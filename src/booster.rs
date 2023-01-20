@@ -32,6 +32,20 @@ impl Booster {
         Ok(Booster::new(handle))
     }
 
+    /// Init from string.
+    pub fn from_string(model_str: &str) -> Result<Self> {
+        let model_cstring = CString::new(model_str).unwrap();
+        let mut out_num_iterations = 0;
+        let mut handle = std::ptr::null_mut();
+        lgbm_call!(lightgbm_sys::LGBM_BoosterLoadModelFromString(
+            model_cstring.as_ptr() as *const c_char,
+            &mut out_num_iterations,
+            &mut handle
+        ))?;
+
+        Ok(Booster::new(handle))
+    }
+
     /// Create a new Booster model with given Dataset and parameters.
     ///
     /// Example
@@ -303,5 +317,11 @@ mod tests {
     #[test]
     fn from_file() {
         let _ = Booster::from_file(&"./test/test_from_file.input");
+    }
+
+    #[test]
+    fn from_string() {
+        let model_str = std::fs::read_to_string(&"./test/test_from_file.input").unwrap();
+        let _ = Booster::from_string(&model_str);
     }
 }
