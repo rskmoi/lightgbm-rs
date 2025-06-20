@@ -38,7 +38,6 @@ fn main() {
     // CMake
     let dst = Config::new(&lgbm_root)
         .profile("Release")
-        .uses_cxx11()
         .define("BUILD_STATIC_LIB", "ON")
         .build();
 
@@ -47,6 +46,11 @@ fn main() {
         .header("wrapper.h")
         .clang_args(&["-x", "c++", "-std=c++11"])
         .clang_arg(format!("-I{}", lgbm_root.join("include").display()))
+        .allowlist_function("LGBM_.*")
+        .allowlist_type("LGBM_.*")
+        .allowlist_var("C_API_.*")
+        .blocklist_type("std::.*")
+        .blocklist_type("__gnu_cxx::.*")
         .generate()
         .expect("Unable to generate bindings");
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
